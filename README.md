@@ -4,8 +4,11 @@
 
 2. コンテナを起動する。
 
+    分割するなら、環境変数を秒で渡す。
+    例えば、600とすると、35分の音声ファイルは、10分、10分、10分、5分と分割される。
+
     ```bash
-    docker-compose up
+    SPLIT_DURATION=600 docker-compose up --build
     ```
 
 3. `/output/`に出力される。

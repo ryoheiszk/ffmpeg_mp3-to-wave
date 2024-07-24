@@ -6,4 +6,6 @@ services:
     volumes:
       - ./input:/app/input
       - ./output:/app/output
+    environment:
+      - SPLIT_DURATION=${SPLIT_DURATION:-0}
     command: python main.py
