@@ -1,6 +1,10 @@
 import os
+import sys
 import logging
-from convert_mp3_to_wav import ENABLE_SPLIT
+import glob
+from pydub import AudioSegment
+from tqdm import tqdm
+from convert_mp3_to_wav import convert_and_split
 from asr_processor import process_asr
 import settings
 
@@ -12,12 +16,44 @@ def setup_directories():
             os.makedirs(directory)
             logging.info(f"Created directory: {directory}")
 
+def clean_output_directory():
+    wav_files = glob.glob(os.path.join(settings.OUTPUT_DIR, "*.wav"))
+    for file in wav_files:
+        os.remove(file)
+        logging.info(f"Removed existing WAV file: {file}")
+
+def clean_asr_directory():
+    txt_files = glob.glob(os.path.join(settings.ASR_OUTPUT_DIR, "*.txt"))
+    for file in txt_files:
+        os.remove(file)
+        logging.info(f"Removed existing ASR output file: {file}")
+
+def merge_mp3_files():
+    mp3_files = glob.glob(os.path.join(settings.INPUT_DIR, "*.mp3"))
+    if len(mp3_files) > 1:
+        logging.info("Multiple MP3 files found. Merging...")
+        combined = AudioSegment.empty()
+        for mp3_file in tqdm(mp3_files, desc="Merging MP3 files"):
+            audio = AudioSegment.from_mp3(mp3_file)
+            combined += audio
+        output_path = os.path.join(settings.INPUT_DIR, "merged_input.mp3")
+        combined.export(output_path, format="mp3")
+        logging.info(f"Merged MP3 file saved as: {output_path}")
+
+        # Remove original MP3 files
+        for mp3_file in mp3_files:
+            os.remove(mp3_file)
+            logging.info(f"Removed original MP3 file: {mp3_file}")
+
 def main():
     setup_directories()
+    clean_output_directory()
+    clean_asr_directory()
+    merge_mp3_files()
 
     if settings.ENABLE_SPLIT:
         logging.info("Starting MP3 to WAV conversion and splitting process")
-        ENABLE_SPLIT()
+        convert_and_split()
     else:
         logging.info("Skipping MP3 to WAV conversion and splitting as per settings")
 
@@ -31,3 +67,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    sys.exit(0) # 明示的に終了(コンテナを終了するため)
