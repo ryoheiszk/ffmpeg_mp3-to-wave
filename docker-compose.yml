@@ -1,11 +1,12 @@
 version: '3.8'
 
 services:
-  converter:
+  audio_processor:
     build: .
     volumes:
       - ./input:/app/input
       - ./output:/app/output
-    environment:
-      - SPLIT_DURATION=${SPLIT_DURATION:-0}
+      - ./asr:/app/asr
+    env_file:
+      - .env
     command: python main.py
