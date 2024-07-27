@@ -1,7 +1,7 @@
 import os
-import sys
 import logging
 import glob
+import sys
 from pydub import AudioSegment
 from tqdm import tqdm
 from convert_mp3_to_wav import convert_and_split
@@ -17,10 +17,11 @@ def setup_directories():
             logging.info(f"Created directory: {directory}")
 
 def clean_output_directory():
-    wav_files = glob.glob(os.path.join(settings.OUTPUT_DIR, "*.wav"))
-    for file in wav_files:
-        os.remove(file)
-        logging.info(f"Removed existing WAV file: {file}")
+    if settings.ENABLE_CONVERT:
+        wav_files = glob.glob(os.path.join(settings.OUTPUT_DIR, "*.wav"))
+        for file in wav_files:
+            os.remove(file)
+            logging.info(f"Removed existing WAV file: {file}")
 
 def clean_asr_directory():
     txt_files = glob.glob(os.path.join(settings.ASR_OUTPUT_DIR, "*.txt"))
@@ -47,24 +48,25 @@ def merge_mp3_files():
 
 def main():
     setup_directories()
-    clean_output_directory()
-    clean_asr_directory()
-    merge_mp3_files()
 
-    if settings.ENABLE_SPLIT:
-        logging.info("Starting MP3 to WAV conversion and splitting process")
+    if settings.ENABLE_CONVERT:
+        clean_output_directory()
+        merge_mp3_files()
+
+        logging.info("Starting MP3 to WAV conversion process")
         convert_and_split()
     else:
-        logging.info("Skipping MP3 to WAV conversion and splitting as per settings")
+        logging.info("Skipping MP3 to WAV conversion as per settings")
 
     if settings.ENABLE_ASR:
+        clean_asr_directory()
         logging.info("Starting ASR processing")
         process_asr()
     else:
         logging.info("Skipping ASR processing as per settings")
 
     logging.info("All processes completed")
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
-    sys.exit(0) # 明示的に終了(コンテナを終了するため)

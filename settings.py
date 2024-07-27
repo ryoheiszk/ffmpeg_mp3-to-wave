@@ -1,9 +1,9 @@
 import os
 
 # Process flow control
-ENABLE_SPLIT = True  # True to convert MP3 to WAV and split
-SPLIT_DURATION = 300  # in seconds, 0 for no splitting
-ENABLE_ASR = True  # True to perform ASR on WAV files
+ENABLE_CONVERT = True
+SPLIT_DURATION = 100  # in seconds, 0 for no splitting
+ENABLE_ASR = True
 
 # ASR settings
 ASR_URL = os.environ.get('ASR_URL')
